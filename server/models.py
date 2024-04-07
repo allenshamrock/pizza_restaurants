@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship,validates
 
 metadata = MetaData(naming_convention={
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
@@ -19,8 +19,8 @@ class Restaurant(db.Model):
     #relationship to RestaurantPizza
     pizzas = relationship('RestaurantPizza', back_populates='restaurant')
 
-    @name('name')
-    def validate_name(self, name):
+    @validates('name')
+    def validate_name(self,key,name):
         if len(name) > 50:
             raise ValueError("Name must be less than 50 characters.")
         return name
@@ -41,7 +41,7 @@ class Pizza(db.Model):
 
 
 class RestaurantPizza(db.Model):
-    __tablename__ = 'RestaurantPizza'
+    __tablename__ = 'restaurantpizzas'
 
     id = db.Column(db.Integer, primary_key=True)
     price = db.Column(db.Integer)
@@ -54,8 +54,8 @@ class RestaurantPizza(db.Model):
     # relationship to Pizza
     pizza = relationship('Pizza', back_populates='restaurants')
 
-    @price('price')
-    def validate_price(self, key, price):
+    @validates('price')
+    def validate_price(self,key,price):
         if not 1 <= price <= 30:
             raise ValueError('Price must be between 1 and 30')
         return price
