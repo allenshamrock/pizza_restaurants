@@ -18,11 +18,7 @@ def home():
 def get_restaurants():
     if request.method == 'GET':
         restaurants = [
-            {
-            "id":restaurant.id,
-            "name":restaurant.name,
-            "address":restaurant.address
-        } for restaurant in Restaurant.query.all()]
+            restaurant.to_dict() for restaurant in Restaurant.query.all()]
         response = make_response(
             jsonify(restaurants),
             200
@@ -42,11 +38,7 @@ def restaurant_by_id(id):
             "pizzas": []
         }
         for pizza in restaurant.pizzas:
-            pizza_data = {
-                "id": pizza.id,
-                "name": pizza.name,
-                "ingredients": pizza.ingredients
-            }
+            pizza_data = pizza.to_dict()
             restaurant_data["pizzas"].append(pizza_data)
 
         response = make_response(jsonify(restaurant_data), 200)
@@ -85,11 +77,7 @@ def delete_restaurant_by_id(id):
 @app.route('/pizzas',methods = ['GET'])
 def pizzas():
     if request.method == 'GET':
-        pizzas = [{
-            "id":pizza.id,
-            "name":pizza.name,
-            "ingredients":pizza.ingredients
-        } for pizza in Pizza.query.all()]
+        pizzas = [pizza.to_dict() for pizza in Pizza.query.all()]
         response = make_response(
             jsonify(pizzas),
             200
