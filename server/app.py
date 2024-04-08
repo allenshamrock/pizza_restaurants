@@ -31,7 +31,7 @@ def get_restaurants():
         return response
 
 
-@app.route('/restaurants/<int:id>')
+@app.route('/restaurants/<int:id>', methods = ['GET'])
 def restaurant_by_id(id):
     restaurant = Restaurant.query.get(id)
     if restaurant:
@@ -57,6 +57,88 @@ def restaurant_by_id(id):
         }
         response = make_response(jsonify(response_body), 404)
         return response
+@app.route('/restaurants/<int:id>' , methods = ['DELETE'])
+def delete_restaurant_by_id(id):
+    restaurant = Restaurant.query.get(id)
+    if restaurant:
+        db.session.delete(restaurant)
+        db.session.commit()
+
+        response_body =make_response({
+            [],
+            200
+        })
+
+        return response_body
+    else:
+        response_body = {
+            "Error": "Restaurant not found."
+        }
+        response = make_response(
+            jsonify(response_body),
+            404
+        )
+
+        return response
+
+
+@app.route('/pizzas',methods = ['GET'])
+def pizzas():
+    if request.method == 'GET':
+        pizzas = [{
+            "id":pizza.id,
+            "name":pizza.name,
+            "ingredients":pizza.ingredients
+        } for pizza in Pizza.query.all()]
+        response = make_response(
+            jsonify(pizzas),
+            200
+        )
+        return response
+
+
+@app.route('/restaurant_pizzas', methods=['POST'])
+def create_restaurant_pizza():
+    # Get data from request
+    price = request.json.get('price')
+    pizza_id = request.json.get('pizza_id')
+    restaurant_id = request.json.get('restaurant_id')
+
+    # Validate input data
+    if not all([price, pizza_id, restaurant_id]):
+        return jsonify({'errors': ['validation errors']}), 400
+
+    # Check if Pizza and Restaurant exist
+    pizza = Pizza.query.get(pizza_id)
+    restaurant = Restaurant.query.get(restaurant_id)
+    if not pizza or not restaurant:
+        return jsonify({'errors': ['Pizza or Restaurant not found']}), 404
+
+    # Create RestaurantPizza object
+    new_restaurant_pizza = RestaurantPizza(
+        price=price,
+        pizza_id=pizza_id,
+        restaurant_id=restaurant_id
+    )
+
+    # Add to database and commit
+    db.session.add(new_restaurant_pizza)
+    db.session.commit()
+
+    # Prepare response data
+    pizza_data = {
+        'id': pizza.id,
+        'name': pizza.name,
+        'ingredients': pizza.ingredients
+    }
+    response = make_response(
+        jsonify(pizza_data), 200
+    )
+        
+    # Return success response with pizza data
+    return response
+
+    
 
 
 
