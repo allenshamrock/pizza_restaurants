@@ -13,7 +13,7 @@ db = SQLAlchemy(metadata=metadata)
 
 class Restaurant(db.Model,SerializerMixin):
     __tablename__ = 'restaurants'
-    serialize_rules=('-restaurantpizzas.restaurant',)
+    serialize_only=('id','name','address')
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -31,12 +31,6 @@ class Restaurant(db.Model,SerializerMixin):
             raise ValueError("Name must be less than 50 characters.")
         return name
     
-    # def to_dict_(self):
-    #     return {
-    #         "id": self.id,
-    #         "name": self.name,
-    #         "address": self.address
-    #     }
 
     def __repr__(self):
         return f"<Restaurant(id={self.id}, name={self.name}, address={self.address})>"
@@ -44,7 +38,7 @@ class Restaurant(db.Model,SerializerMixin):
 
 class Pizza(db.Model,SerializerMixin):
     __tablename__ = 'pizzas'
-    serialize_rules = ('-restaurantpizzas.pizza',)
+    serialize_only = ('id','name','ingredients')
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
