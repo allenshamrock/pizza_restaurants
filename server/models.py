@@ -1,7 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData, ForeignKey
+from sqlalchemy import MetaData
 from sqlalchemy.orm import validates
 from sqlalchemy_serializer import SerializerMixin
+from sqlalchemy.ext.associationproxy import association_proxy
 
 metadata = MetaData(naming_convention={
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
@@ -21,11 +22,20 @@ class Restaurant(db.Model,SerializerMixin):
     #relationship to RestaurantPizza
     restaurantpizzas = db.relationship('RestaurantPizza', back_populates='restaurant')
 
+    pizzas = association_proxy('restaurantpizzas', 'pizza' ,creator = lambda pizza_obj : RestaurantPizza(pizza = pizza_obj))
+
     @validates('name')
     def validate_name(self,key,name):
         if len(name) > 50:
             raise ValueError("Name must be less than 50 characters.")
         return name
+    
+    # def to_dict_(self):
+    #     return {
+    #         "id": self.id,
+    #         "name": self.name,
+    #         "address": self.address
+    #     }
 
     def __repr__(self):
         return f"<Restaurant(id={self.id}, name={self.name}, address={self.address})>"
@@ -41,6 +51,7 @@ class Pizza(db.Model,SerializerMixin):
 
     #relationship to RestaurantPizza
     restaurantpizzas = db.relationship('RestaurantPizza', back_populates='pizza')
+    restaurants = association_proxy('restaurantpizzas','restaurant', creator= lambda restaurant_obj: RestaurantPizza(restaurant = restaurant_obj) )
 
 
 class RestaurantPizza(db.Model,SerializerMixin):

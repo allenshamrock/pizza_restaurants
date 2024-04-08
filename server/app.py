@@ -17,13 +17,47 @@ def home():
 @app.route('/restaurants', methods=['GET'])
 def get_restaurants():
     if request.method == 'GET':
-        restaurants = [restaurant.to_dict() for restaurant in Restaurant.query.all()]
+        restaurants = [
+            {
+            "id":restaurant.id,
+            "name":restaurant.name,
+            "address":restaurant.address
+        } for restaurant in Restaurant.query.all()]
         response = make_response(
-            restaurants,
+            jsonify(restaurants),
             200
         )
 
         return response
+
+
+@app.route('/restaurants/<int:id>')
+def restaurant_by_id(id):
+    restaurant = Restaurant.query.get(id)
+    if restaurant:
+        restaurant_data = {
+            "id": restaurant.id,
+            "name": restaurant.name,
+            "address": restaurant.address,
+            "pizzas": []
+        }
+        for pizza in restaurant.pizzas:
+            pizza_data = {
+                "id": pizza.id,
+                "name": pizza.name,
+                "ingredients": pizza.ingredients
+            }
+            restaurant_data["pizzas"].append(pizza_data)
+
+        response = make_response(jsonify(restaurant_data), 200)
+        return response
+    else:
+        response_body = {
+            "Error": "Restaurant not found."
+        }
+        response = make_response(jsonify(response_body), 404)
+        return response
+
 
 
 if __name__ == '__main__':
