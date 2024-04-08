@@ -1,2 +1,7 @@
-/my env
 env
+
+__pycache__
+instance/
+app.db
+/db/*.sqlite3
+/db/*.sqlite3-*
